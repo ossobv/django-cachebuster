@@ -1,6 +1,20 @@
 __author__ = 'James Addison'
 
 import os
+import sys
+
+
+if sys.version < '3':
+    import codecs
+
+    def u(x):
+        """ Make string a unicode """
+        return codecs.unicode_escape_decode(x)[0]
+else:
+    def u(x):
+        """ Make string a unicode """
+        return x
+
 
 def unique_string(file):
     # TODO: consider using 'inspect' to get the calling module rather than
@@ -17,7 +31,7 @@ def unique_string(file):
         # if they are the same, then we've reached the root directory and
         # can't move up anymore - there is no .git directory.
         if new_base_dir == base_dir:
-            raise EnvironmentError, "django-cachebuster could not find a '.git' directory in your project path. (Moving up from %s)" % original_dir
+            raise EnvironmentError("django-cachebuster could not find a '.git' directory in your project path. (Moving up from %s)" % original_dir)
 
         base_dir = new_base_dir
 
@@ -42,7 +56,7 @@ def unique_string(file):
         fhead.close()
         
         if ref:
-            return unicode(ref)
+            return u(ref)
 
-    raise EnvironmentError, "django-cachebuster ran into a problem parsing a commit hash in your .git directory. (%s)" % git_dir
+    raise EnvironmentError("django-cachebuster ran into a problem parsing a commit hash in your .git directory. (%s)" % git_dir)
 

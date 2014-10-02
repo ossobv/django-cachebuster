@@ -18,12 +18,12 @@ except ImportError:
 register = template.Library()
 
 
-@register.tag(name="media")
+@register.tag(name="cachebustmedia")
 def do_media(parser, token):
     return CacheBusterTag(token, True)
 
 
-@register.tag(name="static")
+@register.tag(name="cachebuststatic")
 def do_static(parser, token):
     return CacheBusterTag(token, False)
 
@@ -35,7 +35,7 @@ class CacheBusterTag(template.Node):
         try:
             tokens = token.split_contents()
         except ValueError:
-            raise template.TemplateSyntaxError, "'%r' tag must have one or two arguments" % token.contents.split()[0]
+            raise template.TemplateSyntaxError("'%r' tag must have one or two arguments" % token.contents.split()[0])
 
         self.path = tokens[1]
         self.force_timestamp = len(tokens) == 3 and tokens[2] or False
@@ -47,7 +47,7 @@ class CacheBusterTag(template.Node):
         except template.VariableDoesNotExist:
             path = self.path
 
-        path = posixpath.normpath(urllib.unquote(path)).lstrip('/')
+        path = posixpath.normpath(path).lstrip('/')
 
         if self.is_media:
             url_prepend = settings.MEDIA_URL
