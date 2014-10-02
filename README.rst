@@ -51,19 +51,17 @@ Now, add ``cachebuster`` to your ``INSTALLED_APPS`` in your project's ``settings
 Template Usage
 ----------------------
 
-To use these cache-busting template tags, you'll need to load the template tag module at the top of each template with ``{% load cachebuster %}``.  Alternatively, as these tags will most likely be used in most of a project's templates, you can tell Django to auto-load them without the requisite ``{% load cachebuster %}`` by adding the following to your ``settings.py``:
+To use these cache-busting template tags, you'll need to load the template tag module at the top of each template with ``{% load cachebuster %}``.  
 
 ::
 
-    from django.template.loader import add_to_builtins
-    add_to_builtins('cachebuster.templatetags.cachebuster')
 
-``{% static filename %}`` attempts to use the ``CACHEBUSTER_UNIQUE_STRING`` (see **Configuration** below) setting to get a cached value to append to your static URLs (ie. ``STATIC_URL``).  If ``CACHEBUSTER_UNIQUE_STRING`` is not set, it falls back to the last date modified of the file.  If ``CACHEBUSTER_UNIQUE_STRING`` is used, you can force last-date-modified behaviour by adding ``True`` into the tag statement like so: ``{% static filename True %}``.  For example
+``{% cachebusterstatic filename %}`` attempts to use the ``CACHEBUSTER_UNIQUE_STRING`` (see **Configuration** below) setting to get a cached value to append to your static URLs (ie. ``STATIC_URL``).  If ``CACHEBUSTER_UNIQUE_STRING`` is not set, it falls back to the last date modified of the file.  If ``CACHEBUSTER_UNIQUE_STRING`` is used, you can force last-date-modified behaviour by adding ``True`` into the tag statement like so: ``{% cachebusterstatic filename True %}``.  For example
 
 ::
 
-    <link rel="stylesheet" href="{% static css/reset.css %}" type="text/css">
-    <link rel="stylesheet" href="{% static css/fonts.css True %}" type="text/css">
+    <link rel="stylesheet" href="{% cachebusterstatic css/reset.css %}" type="text/css">
+    <link rel="stylesheet" href="{% cachebusterstatic css/fonts.css True %}" type="text/css">
 
 This would yield something along the lines of:
 
@@ -72,11 +70,11 @@ This would yield something along the lines of:
     <link rel="stylesheet" href="/static/css/reset.css?927f6b650afce4111514" type="text/css">
     <link rel="stylesheet" href="/static/css/fonts.css?015509150311" type="text/css">
 
-``{% media filename %}`` is similar but has slightly different behaviour, as the file content has a different origin (user uploaded content like avatars, videos, etc.) and cannot depend on any git comment hash.  This is why there is no behaviour other than the last modified date method for MEDIA_URL files.
+``{% cachebustermedia filename %}`` is similar but has slightly different behaviour, as the file content has a different origin (user uploaded content like avatars, videos, etc.) and cannot depend on any git comment hash.  This is why there is no behaviour other than the last modified date method for MEDIA_URL files.
 
 ::
 
-    <img src='{% media uploads/uid1-avatar.jpg %}' />
+    <img src='{% cachebustermedia uploads/uid1-avatar.jpg %}' />
 
 would result in something like this:
 
@@ -134,7 +132,7 @@ Using this prepending method raises a couple of development environment issues, 
 
     ./manage.py runserver --nostatic
 
-Also when using the prepending method in a development environment, to support serving files from both ``{% static %}`` and ``{{ STATIC_URL }}`` (as well as ``{% media %} and ``{{ MEDIA_URL }}``), Django's default ``serve`` views need to be replaced with the following in your ``urls.py``:
+Also when using the prepending method in a development environment, to support serving files from both ``{% cachebusterstatic %}`` and ``{{ STATIC_URL }}`` (as well as ``{% cachebustermedia %} and ``{{ MEDIA_URL }}``), Django's default ``serve`` views need to be replaced with the following in your ``urls.py``:
 
 ::
 
