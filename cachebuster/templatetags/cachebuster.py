@@ -32,19 +32,30 @@ class CacheBusterTag(template.Node):
         try:
             tokens = token.split_contents()
         except ValueError:
-            raise template.TemplateSyntaxError("'%r' tag must have one or two arguments" % token.contents.split()[0])
+            raise template.TemplateSyntaxError(
+                "'%r' tag must have one or two arguments" %
+                token.contents.split()[0])
 
         self.path = tokens[1]
-        self.unique_string = getattr(settings, 'CACHEBUSTER_UNIQUE_STRING', 'no_cachebuster_set')
+        self.unique_string = getattr(
+            settings, 'CACHEBUSTER_UNIQUE_STRING', 'no_cachebuster_set')
 
     def render(self, context):
-        # self.path may be a template variable rather than a simple static file string
+        # self.path can be a template variable or a static string.
         try:
             path = template.Variable(self.path).resolve(context)
         except template.VariableDoesNotExist:
             path = self.path
 
-        if self.is_media:
-            return default_storage.url(path) + '?' + self.unique_string
+        # The return value from the storage is urlencoded so we must remove the
+        # query string.
+        if '?' in path:
+            path, query = path.split('?', 1)
+            query = query + '&' + self.unique_string
         else:
-            return staticfiles_storage.url(path) + '?' + self.unique_string
+            query = self.unique_string
+
+        if self.is_media:
+            return default_storage.url(path) + '?' + query
+        else:
+            return staticfiles_storage.url(path) + '?' + query
